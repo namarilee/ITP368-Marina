@@ -4,7 +4,7 @@ import "dart:math";
 
 import "package:flutter/material.dart";
 
-void main() // 23
+void main2() // 23
 {
   runApp(Yahtzee());
 }
