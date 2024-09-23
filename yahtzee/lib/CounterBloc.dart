@@ -11,7 +11,7 @@ class CountCubit extends Cubit<CountState> {
 		void update(int s) { emit(CountState(s)); }
 }
 
-void main() {
+void mainc() {
 	runApp(const MyApp());
 }
 
@@ -74,5 +74,3 @@ class MyHomePage extends StatelessWidget {
 		);
 	}
 }
-
-
