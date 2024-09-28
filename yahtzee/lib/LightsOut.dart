@@ -48,7 +48,7 @@ class CountCubit extends Cubit<CountState> {
   }
 }
 
-void main() {
+void mainl() {
   runApp(const MyApp());
 }
 
@@ -75,7 +75,7 @@ class MyHomePage extends StatelessWidget {
       body: BlocBuilder<CountCubit, CountState>(
         builder: (context, countState) {
           double screenWidth = MediaQuery.of(context).size.width;
-          int lightCount = countState.count.round();
+          int lightCount = countState.count.round(); 
 
           // Calculate size of each light based on the number of lights and screen width
           double lightSize = (screenWidth / lightCount) - 10; 
