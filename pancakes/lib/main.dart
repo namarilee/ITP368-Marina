@@ -114,6 +114,7 @@ class PancakeSortingHomePage extends StatelessWidget {
     );
   }
 
+  // buttons for Reset and New Stack
   Widget actions(BuildContext context) {
     final pancakeCubit = BlocProvider.of<PancakeStackCubit>(context);
     return Column(
