@@ -118,6 +118,16 @@ class Route1 extends StatelessWidget
                 ( onPressed: (){ Navigator.of(context).pop(); },
                   child: Text("go back",style:ts),
                 ),
+                ElevatedButton
+                ( onPressed: ()
+                  { Navigator.of(context).push
+                    ( MaterialPageRoute
+                      ( builder: (context) => Route3(title:title, cc:cc)
+                      ),
+                    );
+                  },
+                  child: Text("go to page 3", style:ts),
+                ),
               ],
             ),
           );
