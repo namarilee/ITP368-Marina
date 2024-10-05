@@ -1,5 +1,5 @@
-// Barrett Koster
-// demo of Routing/Navigation
+// Marina Lee
+// Routes lab / Splash123
 
 import "package:flutter/material.dart";
 import "package:flutter_bloc/flutter_bloc.dart";
@@ -26,7 +26,7 @@ class RoutesDemo extends StatelessWidget
 
   @override
   Widget build( BuildContext context )
-  { String title = "Routes Demo";
+  { String title = "Splash123";
     return MaterialApp
     ( title: title,
       home: TopBloc(title:title)
@@ -78,6 +78,7 @@ class Route1 extends StatelessWidget
             },
             child: Text("go to page 2", style:ts),
           ),
+          // button to go to page 3
           ElevatedButton
           ( onPressed: ()
             { Navigator.of(context).push
@@ -136,6 +137,8 @@ class Route1 extends StatelessWidget
     );
   }
 }
+
+// Route 3 page
 class Route3 extends StatelessWidget
 { final String title;
   final CounterCubit cc;

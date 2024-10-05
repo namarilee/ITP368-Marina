@@ -125,7 +125,7 @@ class PancakeSortingHomePage extends StatelessWidget {
             IconButton(
               icon: const Icon(Icons.remove),
               onPressed: () {
-                pancakeCubit.createRandomStack(max(2, pancakeCubit.state.pancakes.length - 1));
+                pancakeCubit.createRandomStack(pancakeCubit.state.pancakes.length - 1);
               },
             ),
             Text(
@@ -135,7 +135,7 @@ class PancakeSortingHomePage extends StatelessWidget {
             IconButton(
               icon: const Icon(Icons.add),
               onPressed: () {
-                pancakeCubit.createRandomStack(min(20, pancakeCubit.state.pancakes.length + 1));
+                pancakeCubit.createRandomStack(pancakeCubit.state.pancakes.length + 1);
               },
             ),
           ],
