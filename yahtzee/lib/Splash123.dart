@@ -17,7 +17,7 @@ class CounterCubit extends Cubit<CounterState>
   void inc() { emit( CounterState(state.count+1) ); }
 }
 
-void main()
+void main123()
 { runApp( RoutesDemo() ); }
 
 class RoutesDemo extends StatelessWidget

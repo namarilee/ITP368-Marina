@@ -19,7 +19,7 @@ class SumCubit extends Cubit<SumState>
   void update(int s) { emit(SumState(s)); }
 }
 
-void main27() // 27
+void main() // 27
 {
   runApp(Yahtzee());
 }
