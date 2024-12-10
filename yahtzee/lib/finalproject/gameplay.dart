@@ -156,14 +156,7 @@ class _WordQuestState extends State<WordQuest> {
         ),
         child: Column(
           children: [
-            SizedBox(
-              height: 60.0, child:
-            Image.asset(
-              'lib/finalproject/img/strike$incorrectGuesses.png',
-              width: 170,
-              height: 170,
-            ),
-            ),
+            
             Align(
               alignment: Alignment.center,
               child: Padding(
@@ -205,7 +198,7 @@ class _WordQuestState extends State<WordQuest> {
                 ),
               ),
             ),
-            SizedBox(height: 100),
+            SizedBox(height: 80),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(guessedLetters[currentPlayer]!.length, (index) {
@@ -231,6 +224,14 @@ class _WordQuestState extends State<WordQuest> {
                 );
               }),
             ),
+            SizedBox(
+              height: 60.0, child:
+            Image.asset(
+              'lib/finalproject/img/strike$incorrectGuesses.png',
+              width: 170,
+              height: 170,
+            ),
+            ),
             SizedBox(height: 50),
             Container(
               padding: const EdgeInsets.all(16.0),
@@ -251,17 +252,27 @@ class _WordQuestState extends State<WordQuest> {
                   if (definition.length > 200) {
                     fontSize = 12;
                   }
-                  return SingleChildScrollView(
-                    child: Text(
-                      definition,
-                      style: TextStyle(fontSize: fontSize),
-                      textAlign: TextAlign.center,
+                    return SingleChildScrollView(
+                    child: Column(
+                      children: [
+                      Text(
+                        'CLUE',
+                        style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.bold, color: Color.fromRGBO(47, 70, 160, 1)),
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(height: 10),
+                      Text(
+                        definition,
+                        style: TextStyle(fontSize: fontSize),
+                        textAlign: TextAlign.center,
+                      ),
+                      ],
                     ),
-                  );
+                    );
                 },
               ),
             ),
-            SizedBox(height: 120),
+            SizedBox(height: 80),
             KeyBoard(onKeyPress, keyColors),
           ],
         ),
