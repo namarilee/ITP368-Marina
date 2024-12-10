@@ -4,7 +4,7 @@ import "package:flutter_bloc/flutter_bloc.dart";
 import "package:path_provider/path_provider.dart";
 
 
-void mainGr() // FS
+void main() // FS
 { runApp( FileStuff () );
 }
 
