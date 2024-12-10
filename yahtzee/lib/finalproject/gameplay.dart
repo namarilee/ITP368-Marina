@@ -15,41 +15,49 @@ class WordQuest extends StatefulWidget {
 class _WordQuestState extends State<WordQuest> {
   String definition = 'Loading...';
   String randomWord = '';
-  List<String> guessedLetters = ['', '', ''];
+  Map<int, List<String>> guessedLetters = {1: ['','',''], 2: ['','','']};
+  Map<String, Color> keyColors = {};
+  int incorrectGuesses = 0;
+  int currentPlayer = 1;
+  Map<int, int> playerLevels = {1: 1, 2: 1}; // Track levels for each player
 
   @override
   void initState() {
     super.initState();
     fetchDefinition();
   }
+
   Future<void> fetchDefinition() async {
     try {
-      // Fetch a random word of length 3
-      final wordResponse = await http.get(Uri.parse('https://random-word-api.herokuapp.com/word?number=1&length=3'));
-      if (wordResponse.statusCode == 200) {
-        final word = json.decode(wordResponse.body)[0];
-        setState(() {
-          randomWord = word.toUpperCase();
-        });
+      int wordLength = playerLevels[currentPlayer]! + 2; // Level 1: 3 letters, Level 2: 4 letters, etc.
+      bool definitionFound = false;
 
-        // Fetch the definition of the word
-        final definitionResponse = await http.get(Uri.parse('https://api.dictionaryapi.dev/api/v2/entries/en/$word'));
-        if (definitionResponse.statusCode == 200) {
-          final definitionData = json.decode(definitionResponse.body);
-          final wordDefinition = definitionData[0]['meanings'][0]['definitions'][0]['definition'];
+      while (!definitionFound) {
+        final wordResponse = await http.get(Uri.parse('https://random-word-api.herokuapp.com/word?number=1&length=$wordLength'));
+        if (wordResponse.statusCode == 200) {
+          final word = json.decode(wordResponse.body)[0];
+          final definitionResponse = await http.get(Uri.parse('https://api.dictionaryapi.dev/api/v2/entries/en/$word'));
 
-          setState(() {
-            definition = wordDefinition;
-          });
+          if (definitionResponse.statusCode == 200) {
+            final definitionData = json.decode(definitionResponse.body);
+            final wordDefinition = definitionData[0]['meanings'][0]['definitions'][0]['definition'];
+
+            setState(() {
+              randomWord = word.toUpperCase();
+              definition = wordDefinition;
+              definitionFound = true;
+            });
+          } else {
+            // Retry fetching a new word
+            setState(() {
+              definition = 'Definition not found. Retrying...';
+            });
+          }
         } else {
           setState(() {
-            definition = 'Definition not found.';
+            definition = 'Failed to fetch word.';
           });
         }
-      } else {
-        setState(() {
-          definition = 'Failed to fetch word.';
-        });
       }
     } catch (e) {
       setState(() {
@@ -60,11 +68,75 @@ class _WordQuestState extends State<WordQuest> {
 
   void onKeyPress(String letter) {
     setState(() {
+      bool isCorrect = false;
       for (int i = 0; i < randomWord.length; i++) {
         if (randomWord[i] == letter) {
-          guessedLetters[i] = letter;
+          guessedLetters[currentPlayer]![i] = letter;
+          isCorrect = true;
         }
       }
+      if (!isCorrect) {
+        incorrectGuesses++;
+        if (incorrectGuesses >= 3) {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text('Incorrect!'),
+                content: Text('The correct word was $randomWord'),
+                actions: [
+                  TextButton(
+                    onPressed: () {                      
+                      Navigator.of(context).pop();
+                      switchPlayer(false); // stay at same level
+                    },
+                    child: Text('OK'),
+                  ),
+                ],
+              );
+            },
+          );
+        } 
+      } else if (!guessedLetters[currentPlayer]!.contains('')) {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text('Correct!'),
+                content: Text('The correct word was $randomWord'),
+                actions: [
+                    TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      switchPlayer(true); // level up
+                    },
+                    child: Text('OK'),
+                  ),
+                ],
+              );
+            },
+          );
+        //  switchPlayer();
+      }
+      keyColors[letter] = isCorrect ? const Color.fromRGBO(54, 148, 155, 1) : const Color.fromRGBO(255, 119, 74, 1);
+    });
+  }
+
+  void switchPlayer(bool levelUp) {
+    setState(() {
+      if (levelUp) {
+        playerLevels[currentPlayer] = (playerLevels[currentPlayer]! < 4) ? playerLevels[currentPlayer]! + 1 : 4; // Max level is 4
+      }
+      currentPlayer = currentPlayer == 1 ? 2 : 1;
+      incorrectGuesses = 0;
+      int wordLength = playerLevels[currentPlayer]! + 2; // Calculate word length based on player's level
+      guessedLetters[currentPlayer] = List.filled(wordLength, '');
+      keyColors.clear(); // Clear the key colors
+      // Reset all key colors to blue
+      for (var letter in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')) {
+        keyColors[letter] = const Color.fromRGBO(161, 236, 241, 1);
+      }
+      fetchDefinition();
     });
   }
 
@@ -81,22 +153,20 @@ class _WordQuestState extends State<WordQuest> {
         child: Column(
             children: [
               Image.asset(
-                'lib/finalproject/img/strike0.png',
+                'lib/finalproject/img/strike$incorrectGuesses.png',
                 width: 170,
                 height: 170,
                 ),
               const SizedBox(height: 0),
-            const SizedBox(
-              
+            SizedBox(
               height: 150,
               child: Column(
               children: [
-                
-                const Text(
-                "Player 1's Turn",
+                Text(
+                "Player $currentPlayer's Turn",
                 style: TextStyle(fontSize: 24),
                 ),
-                const Align(
+                Align(
                 alignment: Alignment.centerLeft,
                 child: Padding(
                   padding: EdgeInsets.only(bottom: 8.0),
@@ -123,22 +193,26 @@ class _WordQuestState extends State<WordQuest> {
             const SizedBox(height: 0),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(3, (index) {
+              children: List.generate(guessedLetters[currentPlayer]!.length, (index) {
                 return Container(
-                margin: EdgeInsets.only(right: index < 2 ? 10.0 : 0.0),
+                margin: EdgeInsets.only(right: index < guessedLetters[currentPlayer]!.length - 1 ? 10.0 : 0.0),
                 width: 50,
                 height: 50,
                 decoration: BoxDecoration(
-                color: Colors.white,
-                border: Border.all(color: Colors.grey),
+                color: guessedLetters[currentPlayer]![index].isNotEmpty ? const Color.fromRGBO(47, 70, 160, 1) : Colors.white,
+                border: guessedLetters[currentPlayer]![index].isNotEmpty ? Border.all(color: const Color.fromRGBO(47, 70, 160, 1)) : Border.all(color: Colors.grey),
                 borderRadius: BorderRadius.all(Radius.circular(10.0)),
                 ),
                 child: Center(
                     child: Text(
-                      guessedLetters[index],
-                      style: TextStyle(fontSize: 24),
+                      guessedLetters[currentPlayer]![index],
+                      style: TextStyle(
+                      fontSize: 24,
+                      color: Colors.white,
+                      fontWeight: guessedLetters[currentPlayer]![index].isNotEmpty ? FontWeight.bold : FontWeight.normal,
+                      ),
                     ),
-                  ),
+                    ),
                 );
               }),
             ),
@@ -157,7 +231,7 @@ class _WordQuestState extends State<WordQuest> {
               ),
             ),
             const SizedBox(height: 100),
-            KeyBoard(onKeyPress),
+            KeyBoard(onKeyPress, keyColors),
           ],
         ),
       ),
@@ -167,7 +241,8 @@ class _WordQuestState extends State<WordQuest> {
 
 class KeyBoard extends StatelessWidget {
   final Function(String) onKeyPress;
-  KeyBoard(this.onKeyPress);
+  final Map<String, Color> keyColors;
+  KeyBoard(this.onKeyPress, this.keyColors);
 
   @override
   Widget build( BuildContext context )
@@ -206,22 +281,25 @@ class KeyBoard extends StatelessWidget {
   }
 
   Widget ky(String letter, {double borderRadius = 10.0}) {
+    Color backgroundColor = keyColors[letter] ?? const Color.fromRGBO(161, 236, 241, 1); // Default to blue if not guessed
+    Color textColor = (backgroundColor == const Color.fromRGBO(161, 236, 241, 1)) ? Colors.white : Colors.black; // Change text color to white if guessed
+
     return Container(
-      width: 32.0, // Set the desired width
+      width: 32.5, // Set the desired width
       height: 42.0, // Set the desired height
       child: TextButton(
         onPressed: () {
           onKeyPress(letter);
         },
         style: TextButton.styleFrom(
-          backgroundColor: const Color.fromRGBO(161, 236, 241, 1), // Change button color to orange
+          backgroundColor: backgroundColor, // Change button color to orange
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(borderRadius),
           ),
         ),
         child: Text(
           letter,
-          style: TextStyle(color: Colors.black, fontSize: 14),
+          style: TextStyle(color: textColor, fontSize: 16),
         ),
       ),
     );
