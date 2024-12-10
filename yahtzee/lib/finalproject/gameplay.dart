@@ -28,6 +28,9 @@ class _WordQuestState extends State<WordQuest> {
   }
 
   Future<void> fetchDefinition() async {
+    setState(() {
+      definition = 'Loading...';
+    });
     try {
       int wordLength = playerLevels[currentPlayer]! + 2; // Level 1: 3 letters, Level 2: 4 letters, etc.
       bool definitionFound = false;
@@ -143,80 +146,92 @@ class _WordQuestState extends State<WordQuest> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color.fromRGBO(255, 248, 246, 1), // Set the background color of the entire screen
       body: Padding(
         padding: const EdgeInsets.only(
-                left: 20.0,
-                right: 20.0,
-                top: 20,
-                bottom: 20,
-              ),
+          left: 20.0,
+          right: 20.0,
+          top: 55,
+          bottom: 20,
+        ),
         child: Column(
-            children: [
-              Image.asset(
-                'lib/finalproject/img/strike$incorrectGuesses.png',
-                width: 170,
-                height: 170,
-                ),
-              const SizedBox(height: 0),
+          children: [
             SizedBox(
-              height: 150,
-              child: Column(
-              children: [
-                Text(
-                "Player $currentPlayer's Turn",
-                style: TextStyle(fontSize: 24),
+              height: 60.0, child:
+            Image.asset(
+              'lib/finalproject/img/strike$incorrectGuesses.png',
+              width: 170,
+              height: 170,
+            ),
+            ),
+            Align(
+              alignment: Alignment.center,
+              child: Padding(
+                padding: EdgeInsets.only(bottom: 12.0),
+                child: Text(
+                  "Player $currentPlayer's Turn",
+                  style: TextStyle(fontSize: 24),
                 ),
-                Align(
-                alignment: Alignment.centerLeft,
-                child: Padding(
-                  padding: EdgeInsets.only(bottom: 8.0),
-                  child: Text(
+              ),
+            ),
+            SizedBox(
+              height: 30.0, 
+              child: Image.asset(
+              'lib/finalproject/img/level1.png',
+              width: 120,
+              height: 120,
+            ),
+            ),
+            
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: EdgeInsets.only(left: 25.0, bottom: 8.0),
+                child: Text(
                   "Progress",
                   style: TextStyle(fontSize: 14),
-                  ),
                 ),
-                ),
-                const SizedBox(
-                height: 10.0,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                  child: LinearProgressIndicator(
+              ),
+            ),
+            const SizedBox(
+              height: 10.0,
+              width: 350.0,
+              child: ClipRRect(
+                borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                child: LinearProgressIndicator(
                   value: 0.5,
                   color: Color.fromRGBO(161, 236, 241, 1),
                   backgroundColor: Color.fromRGBO(224, 236, 237, 1),
-                  ),
                 ),
-                ),
-              ],
               ),
             ),
-            const SizedBox(height: 0),
+            SizedBox(height: 100),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(guessedLetters[currentPlayer]!.length, (index) {
                 return Container(
-                margin: EdgeInsets.only(right: index < guessedLetters[currentPlayer]!.length - 1 ? 10.0 : 0.0),
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                color: guessedLetters[currentPlayer]![index].isNotEmpty ? const Color.fromRGBO(47, 70, 160, 1) : Colors.white,
-                border: guessedLetters[currentPlayer]![index].isNotEmpty ? Border.all(color: const Color.fromRGBO(47, 70, 160, 1)) : Border.all(color: Colors.grey),
-                borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                ),
-                child: Center(
+                  margin: EdgeInsets.only(right: index < guessedLetters[currentPlayer]!.length - 1 ? 10.0 : 0.0),
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: guessedLetters[currentPlayer]![index].isNotEmpty ? const Color.fromRGBO(47, 70, 160, 1) : Colors.white,
+                    border: guessedLetters[currentPlayer]![index].isNotEmpty ? Border.all(color: const Color.fromRGBO(47, 70, 160, 1)) : Border.all(color: Colors.grey),
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                  ),
+                  child: Center(
                     child: Text(
                       guessedLetters[currentPlayer]![index],
                       style: TextStyle(
-                      fontSize: 24,
-                      color: Colors.white,
-                      fontWeight: guessedLetters[currentPlayer]![index].isNotEmpty ? FontWeight.bold : FontWeight.normal,
+                        fontSize: 24,
+                        color: Colors.white,
+                        fontWeight: guessedLetters[currentPlayer]![index].isNotEmpty ? FontWeight.bold : FontWeight.normal,
                       ),
                     ),
-                    ),
+                  ),
                 );
               }),
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: 50),
             Container(
               padding: const EdgeInsets.all(16.0),
               decoration: BoxDecoration(
@@ -224,13 +239,29 @@ class _WordQuestState extends State<WordQuest> {
                 border: Border.all(color: const Color.fromRGBO(188, 171, 152, 1)),
                 borderRadius: BorderRadius.all(Radius.circular(10.0)),
               ),
-              child: Text(
-                definition,
-                style: const TextStyle(fontSize: 16),
-                textAlign: TextAlign.center,
+              constraints: BoxConstraints(
+                maxHeight: 200.0,
+              ),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  double fontSize = 16;
+                  if (definition.length > 100) {
+                    fontSize = 16;
+                  }
+                  if (definition.length > 200) {
+                    fontSize = 12;
+                  }
+                  return SingleChildScrollView(
+                    child: Text(
+                      definition,
+                      style: TextStyle(fontSize: fontSize),
+                      textAlign: TextAlign.center,
+                    ),
+                  );
+                },
               ),
             ),
-            const SizedBox(height: 100),
+            SizedBox(height: 120),
             KeyBoard(onKeyPress, keyColors),
           ],
         ),

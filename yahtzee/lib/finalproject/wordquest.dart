@@ -10,6 +10,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: HomePage(),
+      theme: ThemeData(
+        scaffoldBackgroundColor: const Color.fromRGBO(245, 239, 232, 1), // Set background color
+      ),
     );
   }
 }
