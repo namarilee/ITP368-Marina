@@ -13,25 +13,85 @@ class WordQuest extends StatefulWidget {
 }
 
 class _WordQuestState extends State<WordQuest> {
-  TextEditingController _controller = TextEditingController();
+  String definition = 'Loading...';
+  String randomWord = '';
+  List<String> guessedLetters = ['', '', ''];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchDefinition();
+  }
+  Future<void> fetchDefinition() async {
+    try {
+      // Fetch a random word of length 3
+      final wordResponse = await http.get(Uri.parse('https://random-word-api.herokuapp.com/word?number=1&length=3'));
+      if (wordResponse.statusCode == 200) {
+        final word = json.decode(wordResponse.body)[0];
+        setState(() {
+          randomWord = word.toUpperCase();
+        });
+
+        // Fetch the definition of the word
+        final definitionResponse = await http.get(Uri.parse('https://api.dictionaryapi.dev/api/v2/entries/en/$word'));
+        if (definitionResponse.statusCode == 200) {
+          final definitionData = json.decode(definitionResponse.body);
+          final wordDefinition = definitionData[0]['meanings'][0]['definitions'][0]['definition'];
+
+          setState(() {
+            definition = wordDefinition;
+          });
+        } else {
+          setState(() {
+            definition = 'Definition not found.';
+          });
+        }
+      } else {
+        setState(() {
+          definition = 'Failed to fetch word.';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        definition = 'Error occurred.';
+      });
+    }
+  }
+
+  void onKeyPress(String letter) {
+    setState(() {
+      for (int i = 0; i < randomWord.length; i++) {
+        if (randomWord[i] == letter) {
+          guessedLetters[i] = letter;
+        }
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      
       body: Padding(
         padding: const EdgeInsets.only(
                 left: 20.0,
                 right: 20.0,
-                top: 100,
+                top: 20,
                 bottom: 20,
               ),
         child: Column(
             children: [
-            SizedBox(
-              height: 300,
+              Image.asset(
+                'lib/finalproject/img/strike0.png',
+                width: 170,
+                height: 170,
+                ),
+              const SizedBox(height: 0),
+            const SizedBox(
+              
+              height: 150,
               child: Column(
               children: [
+                
                 const Text(
                 "Player 1's Turn",
                 style: TextStyle(fontSize: 24),
@@ -57,19 +117,15 @@ class _WordQuestState extends State<WordQuest> {
                   ),
                 ),
                 ),
-                Image.asset(
-                'lib/finalproject/img/strike0.png',
-                width: 170,
-                height: 170,
-                ),
               ],
               ),
             ),
             const SizedBox(height: 0),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: List.generate(6, (index) {
-              return Container(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(3, (index) {
+                return Container(
+                margin: EdgeInsets.only(right: index < 2 ? 10.0 : 0.0),
                 width: 50,
                 height: 50,
                 decoration: BoxDecoration(
@@ -77,7 +133,13 @@ class _WordQuestState extends State<WordQuest> {
                 border: Border.all(color: Colors.grey),
                 borderRadius: BorderRadius.all(Radius.circular(10.0)),
                 ),
-              );
+                child: Center(
+                    child: Text(
+                      guessedLetters[index],
+                      style: TextStyle(fontSize: 24),
+                    ),
+                  ),
+                );
               }),
             ),
             const SizedBox(height: 20),
@@ -88,14 +150,14 @@ class _WordQuestState extends State<WordQuest> {
                 border: Border.all(color: const Color.fromRGBO(188, 171, 152, 1)),
                 borderRadius: BorderRadius.all(Radius.circular(10.0)),
               ),
-              child: const Text(
-                'This is a paragraph of text inside a box. You can add more text here to provide additional information or instructions.',
-                style: TextStyle(fontSize: 16),
+              child: Text(
+                definition,
+                style: const TextStyle(fontSize: 16),
                 textAlign: TextAlign.center,
               ),
             ),
             const SizedBox(height: 100),
-            KeyBoard(_controller),
+            KeyBoard(onKeyPress),
           ],
         ),
       ),
@@ -103,11 +165,11 @@ class _WordQuestState extends State<WordQuest> {
   }
 }
 
-class KeyBoard extends StatelessWidget
-{
-  final TextEditingController controller;
-  KeyBoard( this.controller );
+class KeyBoard extends StatelessWidget {
+  final Function(String) onKeyPress;
+  KeyBoard(this.onKeyPress);
 
+  @override
   Widget build( BuildContext context )
   {
     return Column(
@@ -146,10 +208,10 @@ class KeyBoard extends StatelessWidget
   Widget ky(String letter, {double borderRadius = 10.0}) {
     return Container(
       width: 32.0, // Set the desired width
-      height: 38.0, // Set the desired height
+      height: 42.0, // Set the desired height
       child: TextButton(
         onPressed: () {
-          // Button onPressed action
+          onKeyPress(letter);
         },
         style: TextButton.styleFrom(
           backgroundColor: const Color.fromRGBO(161, 236, 241, 1), // Change button color to orange
