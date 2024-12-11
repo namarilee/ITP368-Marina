@@ -22,40 +22,36 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(''),
-      ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'Welcome to',
-              style: GoogleFonts.kodchasan(fontSize: 24),
-            ),
-            Text(
-              'WordQuest',
-              style: GoogleFonts.kodchasan(fontSize: 40, fontWeight: FontWeight.bold, color: const Color.fromRGBO(54, 148, 155, 1)),
-            ),
-            SizedBox(height: 250),
-            ElevatedButton(
-              onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => WordQuest()),
-              );
-              },
-              style: ElevatedButton.styleFrom(
-              backgroundColor: const Color.fromRGBO(255, 119, 74, 1), // Change button color to orange
-              minimumSize: Size(200, 50), // Set button width and height
+        child: Padding(
+          padding: const EdgeInsets.only(
+            left: 20.0,
+            right: 20.0,
+            top: 200,
+            bottom: 20,
+          ),
+          child: Column(
+            children: <Widget>[
+              Image.asset("lib/finalproject/img/wordquestlogo.png", width: 370, height: 370,),
+              SizedBox(height: 150),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => WordQuest()),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromRGBO(255, 119, 74, 1), // Change button color to orange
+                  minimumSize: Size(200, 50), // Set button width and height
+                ),
+                child: Text(
+                  'Start game',
+                  style: GoogleFonts.kodchasan(color: Colors.white, fontSize: 24),
+                ),
               ),
-              child: Text(
-              'Start game',
-              style: GoogleFonts.kodchasan(color: Colors.white, fontSize: 24),
-              ),
-            ),
-            
-          ],
+            ],
+          ),
         ),
       ),
     );

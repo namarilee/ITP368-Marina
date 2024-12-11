@@ -84,15 +84,15 @@ class _WordQuestState extends State<WordQuest> {
             context: context,
             builder: (BuildContext context) {
               return AlertDialog(
-                title: Text('Incorrect!'),
-                content: Text('The correct word was $randomWord'),
+                title: Text('Incorrect!', style: GoogleFonts.kodchasan()),
+                content: Text('The correct word was $randomWord', style: GoogleFonts.kodchasan()),
                 actions: [
                   TextButton(
                     onPressed: () {                      
                       Navigator.of(context).pop();
                       switchPlayer(false); // stay at same level
                     },
-                    child: Text('OK'),
+                    child: Text('OK', style: GoogleFonts.kodchasan()),
                   ),
                 ],
               );
@@ -104,21 +104,20 @@ class _WordQuestState extends State<WordQuest> {
             context: context,
             builder: (BuildContext context) {
               return AlertDialog(
-                title: Text('Correct!'),
-                content: Text('The correct word was $randomWord'),
+                title: Text('Correct!', style: GoogleFonts.kodchasan()),
+                content: Text('The correct word was $randomWord', style: GoogleFonts.kodchasan()),
                 actions: [
                     TextButton(
                     onPressed: () {
                       Navigator.of(context).pop();
                       switchPlayer(true); // level up
                     },
-                    child: Text('OK'),
+                    child: Text('OK', style: GoogleFonts.kodchasan()),
                   ),
                 ],
               );
             },
           );
-        //  switchPlayer();
       }
       keyColors[letter] = isCorrect ? const Color.fromRGBO(54, 148, 155, 1) : const Color.fromRGBO(255, 119, 74, 1);
     });
@@ -128,6 +127,26 @@ class _WordQuestState extends State<WordQuest> {
     setState(() {
       if (levelUp) {
         playerLevels[currentPlayer] = (playerLevels[currentPlayer]! < 4) ? playerLevels[currentPlayer]! + 1 : 4; // Max level is 4
+        if (playerLevels[currentPlayer]! > 4) {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text('Player $currentPlayer wins!', style: GoogleFonts.kodchasan()),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      restartGame();
+                    },
+                    child: Text('Restart', style: GoogleFonts.kodchasan()),
+                  ),
+                ],
+              );
+            },
+          );
+          return;
+        }
       }
       currentPlayer = currentPlayer == 1 ? 2 : 1;
       incorrectGuesses = 0;
@@ -138,6 +157,17 @@ class _WordQuestState extends State<WordQuest> {
       for (var letter in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')) {
         keyColors[letter] = const Color.fromRGBO(161, 236, 241, 1);
       }
+      fetchDefinition();
+    });
+  }
+
+  void restartGame() {
+    setState(() {
+      playerLevels = {1: 1, 2: 1};
+      currentPlayer = 1;
+      incorrectGuesses = 0;
+      guessedLetters = {1: [], 2: []};
+      keyColors.clear();
       fetchDefinition();
     });
   }
