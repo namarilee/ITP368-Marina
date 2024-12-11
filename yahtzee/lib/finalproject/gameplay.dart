@@ -1,5 +1,4 @@
-// experimenting with free dictionary api
-
+import 'package:google_fonts/google_fonts.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -145,10 +144,12 @@ class _WordQuestState extends State<WordQuest> {
 
   @override
   Widget build(BuildContext context) {
+    double progressValue = (playerLevels[currentPlayer]! - 1) / 3; // Calculate progress based on level
+
     return Scaffold(
-      backgroundColor: const Color.fromRGBO(255, 248, 246, 1), // Set the background color of the entire screen
+      backgroundColor: const Color.fromRGBO(255, 248, 246, 1),
       body: Padding(
-        padding: const EdgeInsets.only(
+      padding: const EdgeInsets.only(
           left: 20.0,
           right: 20.0,
           top: 55,
@@ -156,45 +157,43 @@ class _WordQuestState extends State<WordQuest> {
         ),
         child: Column(
           children: [
-            
             Align(
               alignment: Alignment.center,
               child: Padding(
                 padding: EdgeInsets.only(bottom: 12.0),
                 child: Text(
                   "Player $currentPlayer's Turn",
-                  style: TextStyle(fontSize: 24),
+                  style: GoogleFonts.kodchasan(fontSize: 24),
                 ),
               ),
             ),
             SizedBox(
-              height: 30.0, 
+              height: 30.0,
               child: Image.asset(
-              'lib/finalproject/img/level1.png',
-              width: 120,
-              height: 120,
+                'lib/finalproject/img/level${playerLevels[currentPlayer]}.png',
+                width: 120,
+                height: 120,
+              ),
             ),
-            ),
-            
             Align(
               alignment: Alignment.centerLeft,
               child: Padding(
-                padding: EdgeInsets.only(left: 25.0, bottom: 8.0),
+                padding: EdgeInsets.only(left: 10.0, bottom: 8.0),
                 child: Text(
                   "Progress",
-                  style: TextStyle(fontSize: 14),
+                  style: GoogleFonts.kodchasan(fontSize: 14),
                 ),
               ),
             ),
-            const SizedBox(
+            SizedBox(
               height: 10.0,
               width: 350.0,
               child: ClipRRect(
-                borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                borderRadius: const BorderRadius.all(Radius.circular(5.0)),
                 child: LinearProgressIndicator(
-                  value: 0.5,
-                  color: Color.fromRGBO(161, 236, 241, 1),
-                  backgroundColor: Color.fromRGBO(224, 236, 237, 1),
+                  value: progressValue,
+                  color: const Color.fromRGBO(161, 236, 241, 1),
+                  backgroundColor: const Color.fromRGBO(224, 236, 237, 1),
                 ),
               ),
             ),
@@ -214,7 +213,7 @@ class _WordQuestState extends State<WordQuest> {
                   child: Center(
                     child: Text(
                       guessedLetters[currentPlayer]![index],
-                      style: TextStyle(
+                      style: GoogleFonts.kodchasan(
                         fontSize: 24,
                         color: Colors.white,
                         fontWeight: guessedLetters[currentPlayer]![index].isNotEmpty ? FontWeight.bold : FontWeight.normal,
@@ -257,13 +256,13 @@ class _WordQuestState extends State<WordQuest> {
                       children: [
                       Text(
                         'CLUE',
-                        style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.bold, color: Color.fromRGBO(47, 70, 160, 1)),
+                        style: GoogleFonts.kodchasan(fontSize: fontSize, fontWeight: FontWeight.bold, color: Color.fromRGBO(47, 70, 160, 1)),
                         textAlign: TextAlign.center,
                       ),
                       SizedBox(height: 10),
                       Text(
                         definition,
-                        style: TextStyle(fontSize: fontSize),
+                        style: GoogleFonts.kodchasan(fontSize: fontSize),
                         textAlign: TextAlign.center,
                       ),
                       ],
@@ -324,7 +323,7 @@ class KeyBoard extends StatelessWidget {
 
   Widget ky(String letter, {double borderRadius = 10.0}) {
     Color backgroundColor = keyColors[letter] ?? const Color.fromRGBO(161, 236, 241, 1); // Default to blue if not guessed
-    Color textColor = (backgroundColor == const Color.fromRGBO(161, 236, 241, 1)) ? Colors.white : Colors.black; // Change text color to white if guessed
+    Color textColor = (backgroundColor == const Color.fromRGBO(161, 236, 241, 1)) ? Colors.black : Colors.white; // Change text color to white if guessed
 
     return Container(
       width: 32.5, // Set the desired width
@@ -341,7 +340,7 @@ class KeyBoard extends StatelessWidget {
         ),
         child: Text(
           letter,
-          style: TextStyle(color: textColor, fontSize: 16),
+          style: GoogleFonts.kodchasan(color: textColor, fontSize: 16),
         ),
       ),
     );
