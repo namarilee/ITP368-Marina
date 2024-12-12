@@ -19,6 +19,9 @@ class _WordQuestState extends State<WordQuest> {
   int incorrectGuesses = 0;
   int currentPlayer = 1;
   Map<int, int> playerLevels = {1: 1, 2: 1}; // Track levels for each player
+  Map<int, int> playerScores = {1: 0, 2: 0}; // Track scores for each player
+  Map<int, int> playerTurns = {1: 0, 2: 0};
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -28,7 +31,7 @@ class _WordQuestState extends State<WordQuest> {
 
   Future<void> fetchDefinition() async {
     setState(() {
-      definition = 'Loading...';
+      isLoading = true;
     });
     try {
       int wordLength = playerLevels[currentPlayer]! + 2; // Level 1: 3 letters, Level 2: 4 letters, etc.
@@ -48,6 +51,7 @@ class _WordQuestState extends State<WordQuest> {
               randomWord = word.toUpperCase();
               definition = wordDefinition;
               definitionFound = true;
+              isLoading = false;
             });
           } else {
             // Retry fetching a new word
@@ -75,6 +79,7 @@ class _WordQuestState extends State<WordQuest> {
         if (randomWord[i] == letter) {
           guessedLetters[currentPlayer]![i] = letter;
           isCorrect = true;
+          playerScores[currentPlayer] = playerScores[currentPlayer]! + 10; // Increase score by 10 for each correct letter
         }
       }
       if (!isCorrect) {
@@ -116,7 +121,7 @@ class _WordQuestState extends State<WordQuest> {
                   ),
                 ],
               );
-            },
+            }, 
           );
       }
       keyColors[letter] = isCorrect ? const Color.fromRGBO(54, 148, 155, 1) : const Color.fromRGBO(255, 119, 74, 1);
@@ -126,13 +131,25 @@ class _WordQuestState extends State<WordQuest> {
   void switchPlayer(bool levelUp) {
     setState(() {
       if (levelUp) {
-        playerLevels[currentPlayer] = (playerLevels[currentPlayer]! < 4) ? playerLevels[currentPlayer]! + 1 : 4; // Max level is 4
-        if (playerLevels[currentPlayer]! > 4) {
+        playerLevels[currentPlayer] = (playerLevels[currentPlayer]! < 5) ? playerLevels[currentPlayer]! + 1 : 5; // Max level is 4
+      }
+      playerTurns[currentPlayer] = playerTurns[currentPlayer]! + 1; // Increment turn count for the current player
+
+      if (playerTurns[1]! >= 5 && playerTurns[2]! >= 5) {
+        // Both players have had 5 turns, end the game
+        String winner;
+        if (playerScores[1]! > playerScores[2]!) {
+          winner = 'Player 1 wins!';
+        } else if (playerScores[2]! > playerScores[1]!) {
+          winner = 'Player 2 wins!';
+        } else {
+          winner = 'It\'s a tie!';
+        }
           showDialog(
             context: context,
             builder: (BuildContext context) {
               return AlertDialog(
-                title: Text('Player $currentPlayer wins!', style: GoogleFonts.kodchasan()),
+                title: Text(winner, style: GoogleFonts.kodchasan()),
                 actions: [
                   TextButton(
                     onPressed: () {
@@ -147,7 +164,7 @@ class _WordQuestState extends State<WordQuest> {
           );
           return;
         }
-      }
+      
       currentPlayer = currentPlayer == 1 ? 2 : 1;
       incorrectGuesses = 0;
       int wordLength = playerLevels[currentPlayer]! + 2; // Calculate word length based on player's level
@@ -164,6 +181,8 @@ class _WordQuestState extends State<WordQuest> {
   void restartGame() {
     setState(() {
       playerLevels = {1: 1, 2: 1};
+      playerScores = {1: 0, 2: 0};
+      playerTurns = {1: 0, 2: 0};
       currentPlayer = 1;
       incorrectGuesses = 0;
       guessedLetters = {1: [], 2: []};
@@ -174,7 +193,7 @@ class _WordQuestState extends State<WordQuest> {
 
   @override
   Widget build(BuildContext context) {
-    double progressValue = (playerLevels[currentPlayer]! - 1) / 3; // Calculate progress based on level
+    double progressValue = playerLevels[currentPlayer]! / 5; // Calculate progress based on turns
 
     return Scaffold(
       backgroundColor: const Color.fromRGBO(255, 248, 246, 1),
@@ -182,23 +201,31 @@ class _WordQuestState extends State<WordQuest> {
       padding: const EdgeInsets.only(
           left: 20.0,
           right: 20.0,
-          top: 55,
+          top: 60,
           bottom: 20,
         ),
         child: Column(
           children: [
+            SizedBox(
+              height: 50.0,
+              child: Image.asset(
+                currentPlayer == 1 ? 'lib/finalproject/img/butterflyprofile.png' : 'lib/finalproject/img/caterpillarprofile.png',
+                width: 150,
+                height: 150,
+              ),
+            ),
             Align(
               alignment: Alignment.center,
               child: Padding(
                 padding: EdgeInsets.only(bottom: 12.0),
                 child: Text(
                   "Player $currentPlayer's Turn",
-                  style: GoogleFonts.kodchasan(fontSize: 24),
+                  style: GoogleFonts.kodchasan(fontSize: 18),
                 ),
               ),
             ),
             SizedBox(
-              height: 30.0,
+              height: 20.0,
               child: Image.asset(
                 'lib/finalproject/img/level${playerLevels[currentPlayer]}.png',
                 width: 120,
@@ -227,7 +254,7 @@ class _WordQuestState extends State<WordQuest> {
                 ),
               ),
             ),
-            SizedBox(height: 80),
+            SizedBox(height: 30),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(guessedLetters[currentPlayer]!.length, (index) {
@@ -261,7 +288,7 @@ class _WordQuestState extends State<WordQuest> {
               height: 170,
             ),
             ),
-            SizedBox(height: 50),
+            SizedBox(height: 30),
             Container(
               padding: const EdgeInsets.all(16.0),
               decoration: BoxDecoration(
@@ -276,10 +303,10 @@ class _WordQuestState extends State<WordQuest> {
                 builder: (context, constraints) {
                   double fontSize = 16;
                   if (definition.length > 100) {
-                    fontSize = 16;
+                    fontSize = 14;
                   }
                   if (definition.length > 200) {
-                    fontSize = 12;
+                    fontSize = 11;
                   }
                     return SingleChildScrollView(
                     child: Column(
@@ -290,7 +317,7 @@ class _WordQuestState extends State<WordQuest> {
                         textAlign: TextAlign.center,
                       ),
                       SizedBox(height: 10),
-                      Text(
+                      isLoading ? CircularProgressIndicator(backgroundColor: const Color.fromRGBO(54, 148, 155, 1), color: const Color.fromRGBO(161, 236, 241, 1)) : Text(
                         definition,
                         style: GoogleFonts.kodchasan(fontSize: fontSize),
                         textAlign: TextAlign.center,
@@ -301,11 +328,78 @@ class _WordQuestState extends State<WordQuest> {
                 },
               ),
             ),
-            SizedBox(height: 80),
+            SizedBox(height: 10),
+            SizedBox(
+              height: 25,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  setState(() {
+                  guessedLetters[currentPlayer] = List.filled(playerLevels[currentPlayer]! + 2, '');
+                  keyColors.clear();
+                  for (var letter in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')) {
+                    keyColors[letter] = const Color.fromRGBO(161, 236, 241, 1);
+                  }
+                  });
+                  fetchDefinition();
+                },
+                icon: Icon(Icons.refresh, color: Colors.white),
+                label: Text(
+                  'Regenerate',
+                  style: GoogleFonts.kodchasan(color: Colors.white),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromRGBO(255, 119, 74, 1),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(7.0),
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: 30),
             KeyBoard(onKeyPress, keyColors),
-          ],
-        ),
+            SizedBox(height: 40),
+            Container(
+              padding: const EdgeInsets.all(7.0),
+              decoration: BoxDecoration(
+                color: const Color.fromRGBO(245, 239, 232, 1),
+                border: Border.all(color: const Color.fromRGBO(188, 171, 152, 1)),
+                borderRadius: BorderRadius.all(Radius.circular(15.0)),
+              ),
+              child: Row(
+                children: [
+                  SizedBox(
+                    height: 35.0,
+                    child: Image.asset(
+                      'lib/finalproject/img/butterfly.png',
+                      width: 120,
+                      height: 120,
+                    ),
+                  ),
+                Text(
+                  '${playerScores[1]}',
+                  style: GoogleFonts.kodchasan(fontSize: 25, fontWeight: FontWeight.bold, color: Color.fromRGBO(47, 70, 160, 1)),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(width: 10),
+                SizedBox(
+                    height: 30.0,
+                    child: Image.asset(
+                      'lib/finalproject/img/caterpillar.png',
+                      width: 120,
+                      height: 120,
+                    ),
+                  ),
+                Text(
+                  '${playerScores[2]}',
+                  style: GoogleFonts.kodchasan(fontSize: 25, fontWeight: FontWeight.bold, color: Color.fromRGBO(47, 70, 160, 1)),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
+    ),
     );
   }
 }
@@ -356,8 +450,8 @@ class KeyBoard extends StatelessWidget {
     Color textColor = (backgroundColor == const Color.fromRGBO(161, 236, 241, 1)) ? Colors.black : Colors.white; // Change text color to white if guessed
 
     return Container(
-      width: 32.5, // Set the desired width
-      height: 42.0, // Set the desired height
+      width: 32.5, 
+      height: 42.0,
       child: TextButton(
         onPressed: () {
           onKeyPress(letter);
