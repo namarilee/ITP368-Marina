@@ -32,6 +32,7 @@ class HomePage extends StatelessWidget {
           ),
           child: Column(
             children: <Widget>[
+              // WordQuest logo
               Image.asset("lib/finalproject/img/wordquestlogo.png", width: 370, height: 370,),
               SizedBox(height: 150),
               ElevatedButton(
@@ -41,9 +42,10 @@ class HomePage extends StatelessWidget {
                     MaterialPageRoute(builder: (context) => WordQuest()),
                   );
                 },
+                // Start button
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromRGBO(255, 119, 74, 1), // Change button color to orange
-                  minimumSize: Size(200, 50), // Set button width and height
+                  backgroundColor: const Color.fromRGBO(255, 119, 74, 1), 
+                  minimumSize: Size(200, 50), 
                 ),
                 child: Text(
                   'Start game',

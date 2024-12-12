@@ -4,8 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 
-
-
 class WordQuest extends StatefulWidget {
   @override
   _WordQuestState createState() => _WordQuestState();
@@ -38,9 +36,11 @@ class _WordQuestState extends State<WordQuest> {
       bool definitionFound = false;
 
       while (!definitionFound) {
+        // Random word API
         final wordResponse = await http.get(Uri.parse('https://random-word-api.herokuapp.com/word?number=1&length=$wordLength'));
         if (wordResponse.statusCode == 200) {
           final word = json.decode(wordResponse.body)[0];
+          // Dictionary API
           final definitionResponse = await http.get(Uri.parse('https://api.dictionaryapi.dev/api/v2/entries/en/$word'));
 
           if (definitionResponse.statusCode == 200) {
@@ -54,7 +54,7 @@ class _WordQuestState extends State<WordQuest> {
               isLoading = false;
             });
           } else {
-            // Retry fetching a new word
+            // Retry fetching a new word if random word doesn't exist in dictionary
             setState(() {
               definition = 'Definition not found. Retrying...';
             });
@@ -185,7 +185,7 @@ class _WordQuestState extends State<WordQuest> {
       playerTurns = {1: 0, 2: 0};
       currentPlayer = 1;
       incorrectGuesses = 0;
-      guessedLetters = {1: [], 2: []};
+      guessedLetters = {1: ['', '', ''], 2: ['', '', '']};
       keyColors.clear();
       fetchDefinition();
     });
@@ -193,7 +193,7 @@ class _WordQuestState extends State<WordQuest> {
 
   @override
   Widget build(BuildContext context) {
-    double progressValue = playerLevels[currentPlayer]! / 5; // Calculate progress based on turns
+    double progressValue = playerTurns[currentPlayer]! / 5; // Calculate progress based on turns
 
     return Scaffold(
       backgroundColor: const Color.fromRGBO(255, 248, 246, 1),
@@ -206,6 +206,8 @@ class _WordQuestState extends State<WordQuest> {
         ),
         child: Column(
           children: [
+
+            // Profile icon
             SizedBox(
               height: 50.0,
               child: Image.asset(
@@ -214,6 +216,8 @@ class _WordQuestState extends State<WordQuest> {
                 height: 150,
               ),
             ),
+
+            // Text for player's turn
             Align(
               alignment: Alignment.center,
               child: Padding(
@@ -224,6 +228,8 @@ class _WordQuestState extends State<WordQuest> {
                 ),
               ),
             ),
+
+            // Level indicator
             SizedBox(
               height: 20.0,
               child: Image.asset(
@@ -232,6 +238,8 @@ class _WordQuestState extends State<WordQuest> {
                 height: 120,
               ),
             ),
+
+            // Progress bar
             Align(
               alignment: Alignment.centerLeft,
               child: Padding(
@@ -255,6 +263,8 @@ class _WordQuestState extends State<WordQuest> {
               ),
             ),
             SizedBox(height: 30),
+
+            // Boxes for each letter of the word
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(guessedLetters[currentPlayer]!.length, (index) {
@@ -280,6 +290,8 @@ class _WordQuestState extends State<WordQuest> {
                 );
               }),
             ),
+
+            // Strikes indicator
             SizedBox(
               height: 60.0, child:
             Image.asset(
@@ -289,6 +301,8 @@ class _WordQuestState extends State<WordQuest> {
             ),
             ),
             SizedBox(height: 30),
+
+            // Box containing the defition/clue
             Container(
               padding: const EdgeInsets.all(16.0),
               decoration: BoxDecoration(
@@ -329,6 +343,8 @@ class _WordQuestState extends State<WordQuest> {
               ),
             ),
             SizedBox(height: 10),
+
+            // Regenerate button
             SizedBox(
               height: 25,
               child: ElevatedButton.icon(
@@ -356,8 +372,12 @@ class _WordQuestState extends State<WordQuest> {
               ),
             ),
             SizedBox(height: 30),
+
+            // Keyboard
             KeyBoard(onKeyPress, keyColors),
             SizedBox(height: 40),
+
+            // Scorekeeping
             Container(
               padding: const EdgeInsets.all(7.0),
               decoration: BoxDecoration(
@@ -377,7 +397,7 @@ class _WordQuestState extends State<WordQuest> {
                   ),
                 Text(
                   '${playerScores[1]}',
-                  style: GoogleFonts.kodchasan(fontSize: 25, fontWeight: FontWeight.bold, color: Color.fromRGBO(47, 70, 160, 1)),
+                  style: GoogleFonts.kodchasan(fontSize: 25, fontWeight: FontWeight.bold, color: Color.fromRGBO(0, 0, 0, 1)),
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(width: 10),
@@ -391,7 +411,7 @@ class _WordQuestState extends State<WordQuest> {
                   ),
                 Text(
                   '${playerScores[2]}',
-                  style: GoogleFonts.kodchasan(fontSize: 25, fontWeight: FontWeight.bold, color: Color.fromRGBO(47, 70, 160, 1)),
+                  style: GoogleFonts.kodchasan(fontSize: 25, fontWeight: FontWeight.bold, color: Color.fromRGBO(0, 0, 0, 1)),
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -446,7 +466,7 @@ class KeyBoard extends StatelessWidget {
   }
 
   Widget ky(String letter, {double borderRadius = 10.0}) {
-    Color backgroundColor = keyColors[letter] ?? const Color.fromRGBO(161, 236, 241, 1); // Default to blue if not guessed
+    Color backgroundColor = keyColors[letter] ?? const Color.fromRGBO(161, 236, 241, 1); // Default to blue color
     Color textColor = (backgroundColor == const Color.fromRGBO(161, 236, 241, 1)) ? Colors.black : Colors.white; // Change text color to white if guessed
 
     return Container(
@@ -457,7 +477,7 @@ class KeyBoard extends StatelessWidget {
           onKeyPress(letter);
         },
         style: TextButton.styleFrom(
-          backgroundColor: backgroundColor, // Change button color to orange
+          backgroundColor: backgroundColor, 
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(borderRadius),
           ),
